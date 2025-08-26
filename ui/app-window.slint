@@ -9,9 +9,34 @@ export component AppWindow inherits Window {
     height: 320px;
     in-out property <string> error_message: "";
     in-out property <string> success_message: "";
+    in-out property <string> wu_status: "未知";
+    in-out property <string> wu_action_text: "";
+    callback toggle-windows-update();
     callback add-xiaohe-doublepinyin();
     callback remove-xiaohe-doublepinyin();
+    callback pause-windows-update();
     VerticalBox {
+        Text {
+            text: "Windows更新";
+            font-size: 18px;
+            horizontal-alignment: center;
+        }
+
+        HorizontalLayout {
+            spacing: 16px;
+            Text {
+                text: "状态：" + root.wu_status;
+                font-size: 16px;
+            }
+
+            Button {
+                text: root.wu_action_text;
+                clicked => {
+                    root.toggle-windows-update();
+                }
+            }
+        }
+
         Button {
             text: "添加小鹤双拼";
             clicked => {
@@ -23,6 +48,13 @@ export component AppWindow inherits Window {
             text: "删除小鹤双拼";
             clicked => {
                 root.remove-xiaohe-doublepinyin();
+            }
+        }
+
+        Button {
+            text: "暂停30天更新";
+            clicked => {
+                root.pause-windows-update();
             }
         }
     }
