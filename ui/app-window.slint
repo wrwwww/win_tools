@@ -1,18 +1,42 @@
+
 import { Button, VerticalBox } from "std-widgets.slint";
+import { ErrorDialog } from "ErrorDialog.slint";
+import { InfoDialog } from "InfoDialog.slint";
 
 export component AppWindow inherits Window {
-    in-out property <int> counter: 42;
-    callback request-increase-value();
+    title: "小工具";
+    width: 480px;
+    height: 320px;
+    in-out property <string> error_message: "";
+    in-out property <string> success_message: "";
+    callback add-xiaohe-doublepinyin();
+    callback remove-xiaohe-doublepinyin();
     VerticalBox {
-        Text {
-            text: "Counter: \{root.counter}";
+        Button {
+            text: "添加小鹤双拼";
+            clicked => {
+                root.add-xiaohe-doublepinyin();
+            }
         }
 
         Button {
-            text: "Increase value";
+            text: "删除小鹤双拼";
             clicked => {
-                root.request-increase-value();
+                root.remove-xiaohe-doublepinyin();
             }
+        }
+    }
+
+    if root.error_message != "": ErrorDialog {
+        message: root.error_message;
+        on_close => {
+            root.error_message = "";
+        }
+    }
+    if root.success_message != "": InfoDialog {
+        message: root.success_message;
+        on_close => {
+            root.success_message = "";
         }
     }
 }
