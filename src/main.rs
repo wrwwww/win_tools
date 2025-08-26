@@ -5,7 +5,11 @@
 slint::include_modules!();
 use std::error::Error;
 use std::time::{Duration, SystemTime};
+use windows::core::PCWSTR;
 use windows::Win32::UI::Shell::IsUserAnAdmin;
+use windows::Win32::UI::WindowsAndMessaging::{
+    MessageBoxW, MB_ICONERROR, MB_ICONINFORMATION, MB_OK,
+};
 use winreg::enums::*;
 use winreg::RegKey;
 
@@ -33,7 +37,20 @@ fn main() -> Result<(), Box<dyn Error>> {
         Err(e) => {
             ui.set_wu_status("未知".into());
             ui.set_wu_action_text("检测失败".into());
-            ui.set_error_message(format!("检测Windows更新状态失败: {}", e).into());
+            unsafe {
+                let msg = format!("检测Windows更新状态失败: {}", e);
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        msg.encode_utf16()
+                            .chain(Some(0))
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONERROR,
+                );
+            }
         }
     }
     let ui_wu = ui.as_weak();
@@ -52,47 +69,170 @@ fn main() -> Result<(), Box<dyn Error>> {
                     Ok(true) => {
                         ui.set_wu_status("开启".into());
                         ui.set_wu_action_text("关闭".into());
-                        ui.set_success_message("已开启Windows更新".into());
+                        unsafe {
+                            MessageBoxW(
+                                None,
+                                PCWSTR(
+                                    "已开启Windows更新\0"
+                                        .encode_utf16()
+                                        .collect::<Vec<u16>>()
+                                        .as_ptr(),
+                                ),
+                                PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                                MB_OK | MB_ICONINFORMATION,
+                            );
+                        }
                     }
                     Ok(false) => {
                         ui.set_wu_status("关闭".into());
                         ui.set_wu_action_text("开启".into());
-                        ui.set_success_message("已关闭Windows更新".into());
+                        unsafe {
+                            MessageBoxW(
+                                None,
+                                PCWSTR(
+                                    "已关闭Windows更新\0"
+                                        .encode_utf16()
+                                        .collect::<Vec<u16>>()
+                                        .as_ptr(),
+                                ),
+                                PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                                MB_OK | MB_ICONINFORMATION,
+                            );
+                        }
                     }
                     Err(e) => {
                         ui.set_wu_status("未知".into());
                         ui.set_wu_action_text("检测失败".into());
-                        ui.set_error_message(format!("检测Windows更新状态失败: {}", e).into());
+                        unsafe {
+                            let msg = format!("检测Windows更新状态失败: {}", e);
+                            MessageBoxW(
+                                None,
+                                PCWSTR(
+                                    msg.encode_utf16()
+                                        .chain(Some(0))
+                                        .collect::<Vec<u16>>()
+                                        .as_ptr(),
+                                ),
+                                PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                                MB_OK | MB_ICONERROR,
+                            );
+                        }
                     }
                 }
             }
-            Err(e) => {
-                ui.set_error_message(format!("操作Windows更新失败: {}", e).into());
-            }
+            Err(e) => unsafe {
+                let msg = format!("操作Windows更新失败: {}", e);
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        msg.encode_utf16()
+                            .chain(Some(0))
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONERROR,
+                );
+            },
         }
     });
     let ui_add = ui.as_weak();
     ui.on_add_xiaohe_doublepinyin(move || {
         let ui = ui_add.clone().unwrap();
         match add_xiaohe_doublepinyin_to_registry() {
-            Ok(_) => ui.set_success_message("添加小鹤双拼成功！".into()),
-            Err(e) => ui.set_error_message(format!("添加小鹤双拼失败: {}", e).into()),
+            Ok(_) => unsafe {
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        "添加小鹤双拼成功！\0"
+                            .encode_utf16()
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONINFORMATION,
+                );
+            },
+            Err(e) => unsafe {
+                let msg = format!("添加小鹤双拼失败: {}", e);
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        msg.encode_utf16()
+                            .chain(Some(0))
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONERROR,
+                );
+            },
         }
     });
     let ui_remove = ui.as_weak();
     ui.on_remove_xiaohe_doublepinyin(move || {
         let ui = ui_remove.clone().unwrap();
         match remove_xiaohe_doublepinyin_from_registry() {
-            Ok(_) => ui.set_success_message("删除小鹤双拼成功！".into()),
-            Err(e) => ui.set_error_message(format!("删除小鹤双拼失败: {}", e).into()),
+            Ok(_) => unsafe {
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        "删除小鹤双拼成功！\0"
+                            .encode_utf16()
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONINFORMATION,
+                );
+            },
+            Err(e) => unsafe {
+                let msg = format!("删除小鹤双拼失败: {}", e);
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        msg.encode_utf16()
+                            .chain(Some(0))
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONERROR,
+                );
+            },
         }
     });
     let ui_pause = ui.as_weak();
     ui.on_pause_windows_update(move || {
         let ui = ui_pause.clone().unwrap();
         match mod_window_update_pause_time() {
-            Ok(_) => ui.set_success_message("已将Windows更新暂停30天".into()),
-            Err(e) => ui.set_error_message(format!("暂停更新失败: {}", e).into()),
+            Ok(_) => unsafe {
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        "已将Windows更新暂停30天\0"
+                            .encode_utf16()
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONINFORMATION,
+                );
+            },
+            Err(e) => unsafe {
+                let msg = format!("暂停更新失败: {}", e);
+                MessageBoxW(
+                    None,
+                    PCWSTR(
+                        msg.encode_utf16()
+                            .chain(Some(0))
+                            .collect::<Vec<u16>>()
+                            .as_ptr(),
+                    ),
+                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    MB_OK | MB_ICONERROR,
+                );
+            },
         }
     });
     ui.run()?;
