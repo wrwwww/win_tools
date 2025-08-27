@@ -5,7 +5,7 @@ import { Button, VerticalBox } from "std-widgets.slint";
 export component AppWindow inherits Window {
     title: "小工具";
     width: 480px;
-    height: 320px;
+    height: 340px;
     in-out property <string> error_message: "";
     in-out property <string> success_message: "";
     in-out property <string> wu_status: "未知";
@@ -17,81 +17,142 @@ export component AppWindow inherits Window {
     callback add-xiaohe-doublepinyin();
     callback remove-xiaohe-doublepinyin();
     callback pause-windows-update();
-    VerticalBox {
-        Text {
-            text: "Windows更新";
-            font-size: 18px;
-            horizontal-alignment: center;
-        }
-
-        HorizontalLayout {
-            spacing: 16px;
-            Text {
-                text: "状态：" + root.wu_status;
-                font-size: 16px;
-            }
-
-            Button {
-                text: root.wu_action_text;
-                clicked => {
-                    root.toggle-windows-update();
-                }
-            }
-        }
-
-        Button {
-            text: "添加小鹤双拼";
-            clicked => {
-                root.add-xiaohe-doublepinyin();
-            }
-        }
-
-        Button {
-            text: "删除小鹤双拼";
-            clicked => {
-                root.remove-xiaohe-doublepinyin();
-            }
-        }
-
-        Button {
-            text: "暂停30天更新";
-            clicked => {
-                root.pause-windows-update();
-            }
-        }
-
-        Rectangle {
-            width: parent.width;
-            height: 80px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            // y: 16px;
-            VerticalLayout {
-                spacing: 8px;
-                Text {
-                    text: "Xbox屏幕录制";
-                    font-size: 18px;
-                    horizontal-alignment: center;
-                }
-
-                HorizontalLayout {
-                    spacing: 16px;
+    Rectangle {
+        background: #fafbfc;
+        border-radius: 12px;
+        width: parent.width;
+        height: parent.height;
+        VerticalLayout {
+            spacing: 18px;
+            y: 24px;
+            Rectangle {
+                background: #fff;
+                border-radius: 8px;
+                width: parent.width - 48px;
+                height: 70px;
+                x: 24px;
+                VerticalLayout {
+                    spacing: 6px;
                     Text {
-                        text: "状态：" + root.xbox_status;
-                        font-size: 16px;
+                        text: "Windows 更新";
+                        font-size: 15px;
+                        font-weight: 500;
+                        horizontal-alignment: left;
+                        color: #222;
                     }
 
-                    Button {
-                        text: "开启";
-                        clicked => {
-                            root.enable-xbox-recording();
+                    HorizontalLayout {
+                        spacing: 16px;
+                        Text {
+                            text: "状态：" + root.wu_status;
+                            // font-size: 13px;
+                        }
+
+                        Button {
+                            text: root.wu_action_text;
+                            // font-size: 13px;
+                            min-width: 70px;
+                            min-height: 28px;
+                            clicked => {
+                                root.toggle-windows-update();
+                            }
+                        }
+
+                        Button {
+                            text: "暂停30天更新";
+                            // font-size: 13px;
+                            min-width: 90px;
+                            min-height: 28px;
+                            clicked => {
+                                root.pause-windows-update();
+                            }
                         }
                     }
+                }
+            }
 
-                    Button {
-                        text: "禁用";
-                        clicked => {
-                            root.disable-xbox-recording();
+            Rectangle {
+                background: #fff;
+                border-radius: 8px;
+                width: parent.width - 48px;
+                height: 70px;
+                x: 24px;
+                VerticalLayout {
+                    spacing: 6px;
+                    Text {
+                        text: "输入法小鹤双拼";
+                        font-size: 15px;
+                        font-weight: 500;
+                        horizontal-alignment: left;
+                        color: #222;
+                    }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        Button {
+                            text: "添加小鹤双拼";
+                            // font-size: 13px;
+                            min-width: 90px;
+                            min-height: 28px;
+                            clicked => {
+                                root.add-xiaohe-doublepinyin();
+                            }
+                        }
+
+                        Button {
+                            text: "删除小鹤双拼";
+                            // font-size: 13px;
+                            min-width: 90px;
+                            min-height: 28px;
+                            clicked => {
+                                root.remove-xiaohe-doublepinyin();
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                background: #fff;
+                border-radius: 8px;
+                width: parent.width - 48px;
+                height: 70px;
+                x: 24px;
+                VerticalLayout {
+                    spacing: 6px;
+                    Text {
+                        text: "Xbox 屏幕录制";
+                        font-size: 15px;
+                        font-weight: 500;
+                        horizontal-alignment: left;
+                        color: #222;
+                    }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        Text {
+                            text: "状态：" + root.xbox_status;
+                            // font-size: 13px;
+                        }
+
+                        Button {
+                            text: "开启";
+                            // font-size: 13px;
+                            min-width: 60px;
+                            min-height: 28px;
+                            clicked => {
+                                root.enable-xbox-recording();
+                            }
+                        }
+
+                        Button {
+                            text: "禁用";
+                            // font-size: 13px;
+                            min-width: 60px;
+                            min-height: 28px;
+                            clicked => {
+                                root.disable-xbox-recording();
+                            }
                         }
                     }
                 }

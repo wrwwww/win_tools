@@ -5,7 +5,7 @@
 slint::include_modules!();
 use std::error::Error;
 use std::time::{Duration, SystemTime};
-use windows::core::PCWSTR;
+use windows::core::{w, PCWSTR};
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::Shell::IsUserAnAdmin;
 use windows::Win32::UI::WindowsAndMessaging::{
@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                             .collect::<Vec<u16>>()
                             .as_ptr(),
                     ),
-                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("错误"),
                     MB_OK | MB_ICONERROR,
                 );
             }
@@ -107,13 +107,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                         unsafe {
                             MessageBoxW(
                                 None,
-                                PCWSTR(
-                                    "已开启Windows更新\0"
-                                        .encode_utf16()
-                                        .collect::<Vec<u16>>()
-                                        .as_ptr(),
-                                ),
-                                PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                                w!("已开启Windows更新"),
+                                w!("提示"),
                                 MB_OK | MB_ICONINFORMATION,
                             );
                         }
@@ -124,13 +119,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                         unsafe {
                             MessageBoxW(
                                 None,
-                                PCWSTR(
-                                    "已关闭Windows更新\0"
-                                        .encode_utf16()
-                                        .collect::<Vec<u16>>()
-                                        .as_ptr(),
-                                ),
-                                PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                                w!("已关闭Windows更新"),
+                                w!("提示"),
                                 MB_OK | MB_ICONINFORMATION,
                             );
                         }
@@ -148,7 +138,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                                         .collect::<Vec<u16>>()
                                         .as_ptr(),
                                 ),
-                                PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                                w!("错误"),
                                 MB_OK | MB_ICONERROR,
                             );
                         }
@@ -165,7 +155,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                             .collect::<Vec<u16>>()
                             .as_ptr(),
                     ),
-                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("错误"),
                     MB_OK | MB_ICONERROR,
                 );
             },
@@ -178,13 +168,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             Ok(_) => unsafe {
                 MessageBoxW(
                     None,
-                    PCWSTR(
-                        "添加小鹤双拼成功！\0"
-                            .encode_utf16()
-                            .collect::<Vec<u16>>()
-                            .as_ptr(),
-                    ),
-                    PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("添加小鹤双拼成功！"),
+                    w!("提示"),
                     MB_OK | MB_ICONINFORMATION,
                 );
             },
@@ -198,7 +183,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                             .collect::<Vec<u16>>()
                             .as_ptr(),
                     ),
-                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("错误"),
                     MB_OK | MB_ICONERROR,
                 );
             },
@@ -211,13 +196,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             Ok(_) => unsafe {
                 MessageBoxW(
                     None,
-                    PCWSTR(
-                        "删除小鹤双拼成功！\0"
-                            .encode_utf16()
-                            .collect::<Vec<u16>>()
-                            .as_ptr(),
-                    ),
-                    PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("删除小鹤双拼成功！"),
+                    w!("提示"),
                     MB_OK | MB_ICONINFORMATION,
                 );
             },
@@ -231,7 +211,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                             .collect::<Vec<u16>>()
                             .as_ptr(),
                     ),
-                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("错误"),
                     MB_OK | MB_ICONERROR,
                 );
             },
@@ -244,13 +224,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             Ok(_) => unsafe {
                 MessageBoxW(
                     None,
-                    PCWSTR(
-                        "已将Windows更新暂停30天\0"
-                            .encode_utf16()
-                            .collect::<Vec<u16>>()
-                            .as_ptr(),
-                    ),
-                    PCWSTR("提示\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("已将Windows更新暂停30天"),
+                    w!("提示"),
                     MB_OK | MB_ICONINFORMATION,
                 );
             },
@@ -264,7 +239,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                             .collect::<Vec<u16>>()
                             .as_ptr(),
                     ),
-                    PCWSTR("错误\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
+                    w!("错误"),
                     MB_OK | MB_ICONERROR,
                 );
             },
