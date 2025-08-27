@@ -6,6 +6,7 @@ slint::include_modules!();
 use std::error::Error;
 use std::time::{Duration, SystemTime};
 use windows::core::PCWSTR;
+use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::Shell::IsUserAnAdmin;
 use windows::Win32::UI::WindowsAndMessaging::{
     MessageBoxW, MB_ICONERROR, MB_ICONINFORMATION, MB_OK,
@@ -23,6 +24,40 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     let ui = AppWindow::new()?;
+    // 初始化Xbox录屏状态
+    let xbox_status = match get_xbox_recording_status() {
+        Ok(true) => "开启",
+        Ok(false) => "禁用",
+        Err(_) => "未知",
+    };
+    ui.set_xbox_status(xbox_status.into());
+
+    let ui_xbox = ui.as_weak();
+    ui.on_enable_xbox_recording(move || {
+        let ui = ui_xbox.clone().unwrap();
+        match enable_xbox_recording() {
+            Ok(_) => {
+                ui.set_xbox_status("开启".into());
+                ui.set_success_message("已开启Xbox屏幕录制".into());
+            }
+            Err(e) => {
+                ui.set_error_message(format!("开启失败: {}", e).into());
+            }
+        }
+    });
+    let ui_xbox2 = ui.as_weak();
+    ui.on_disable_xbox_recording(move || {
+        let ui = ui_xbox2.clone().unwrap();
+        match disable_xbox_recording() {
+            Ok(_) => {
+                ui.set_xbox_status("禁用".into());
+                ui.set_success_message("已禁用Xbox屏幕录制".into());
+            }
+            Err(e) => {
+                ui.set_error_message(format!("禁用失败: {}", e).into());
+            }
+        }
+    });
     // 检查Windows更新状态并初始化前端
     let status = get_windows_update_status();
     match status {
@@ -40,7 +75,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             unsafe {
                 let msg = format!("检测Windows更新状态失败: {}", e);
                 MessageBoxW(
-                    None,
+                    Some(HWND(std::ptr::null_mut())),
                     PCWSTR(
                         msg.encode_utf16()
                             .chain(Some(0))
@@ -241,77 +276,36 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 /// 检查Windows更新服务是否开启
 fn get_windows_update_status() -> Result<bool, Box<dyn std::error::Error>> {
-    use std::ptr;
-    use windows::core::PCWSTR;
-    use windows::Win32::System::Services::{
-        OpenSCManagerW, OpenServiceW, QueryServiceStatus, SC_MANAGER_CONNECT, SERVICE_QUERY_STATUS,
-        SERVICE_RUNNING, SERVICE_STATUS,
-    };
-    let scm =
-        unsafe { OpenSCManagerW(PCWSTR(ptr::null()), PCWSTR(ptr::null()), SC_MANAGER_CONNECT) };
-    if let Ok(scm) = scm {
-        let service = unsafe {
-            OpenServiceW(
-                scm,
-                PCWSTR("wuauserv\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
-                SERVICE_QUERY_STATUS,
-            )
-        };
-        if let Ok(service) = service {
-            let mut status = SERVICE_STATUS::default();
-            let ok = unsafe { QueryServiceStatus(service, &mut status) };
-            dbg!(&status);
-            if ok.is_err() {
-                return Err("无法查询服务状态".into());
+    // 检查注册表组策略是否存在，不存在或者存在且值为0表示启用自动更新
+    let hkcu = RegKey::predef(HKEY_LOCAL_MACHINE);
+    let path = r"Software\Policies\Microsoft\Windows\WindowsUpdate\AU";
+    match hkcu.open_subkey_with_flags(path, KEY_READ) {
+        Ok(key) => {
+            let value: u32 = key.get_value("NoAutoUpdate").unwrap_or(0);
+            if value == 0 {
+                Ok(true)
+            } else {
+                Ok(false)
             }
-            Ok(status.dwCurrentState == SERVICE_RUNNING)
-        } else {
-            Err("无法打开wuauserv服务".into())
         }
-    } else {
-        Err("无法打开服务管理器".into())
+        Err(_) => Ok(true),
     }
 }
 
 /// 启用或禁用Windows更新服务
 fn set_windows_update_enabled(enable: bool) -> Result<(), Box<dyn std::error::Error>> {
-    use std::ptr;
-    use windows::core::PCWSTR;
-    use windows::Win32::System::Services::{
-        ControlService, OpenSCManagerW, OpenServiceW, StartServiceW, SC_MANAGER_CONNECT,
-        SERVICE_CONTROL_STOP, SERVICE_QUERY_STATUS, SERVICE_START, SERVICE_STOP,
+    let hkcu = RegKey::predef(HKEY_LOCAL_MACHINE);
+    let path = r"Software\Policies\Microsoft\Windows\WindowsUpdate\AU";
+    let key = match hkcu.open_subkey_with_flags(path, KEY_SET_VALUE) {
+        Ok(k) => k,
+        Err(_) => hkcu.create_subkey(path)?.0,
     };
-    let scm =
-        unsafe { OpenSCManagerW(PCWSTR(ptr::null()), PCWSTR(ptr::null()), SC_MANAGER_CONNECT) };
-    if let Ok(scm) = scm {
-        let service = unsafe {
-            OpenServiceW(
-                scm,
-                PCWSTR("wuauserv\0".encode_utf16().collect::<Vec<u16>>().as_ptr()),
-                SERVICE_START | SERVICE_STOP | SERVICE_QUERY_STATUS,
-            )
-        };
-        if let Ok(service) = service {
-            if enable {
-                let ok = unsafe { StartServiceW(service, None) };
-                if ok.is_err() {
-                    return Err("启动服务失败".into());
-                }
-            } else {
-                use windows::Win32::System::Services::SERVICE_STATUS;
-                let mut status = SERVICE_STATUS::default();
-                let ok = unsafe { ControlService(service, SERVICE_CONTROL_STOP, &mut status) };
-                if ok.is_err() {
-                    return Err("停止服务失败".into());
-                }
-            }
-            Ok(())
-        } else {
-            Err("无法打开wuauserv服务".into())
-        }
-    } else {
-        Err("无法打开服务管理器".into())
+    let mut value = 0u32;
+    if !enable {
+        value = 1;
     }
+    key.set_value("NoAutoUpdate", &value)?; // 0表示启用自动更新
+    Ok(())
 }
 
 #[cfg(windows)]
@@ -405,4 +399,36 @@ fn systemtime_to_iso8601(st: SystemTime) -> String {
     use chrono::{DateTime, Utc};
     let datetime: DateTime<Utc> = st.into();
     datetime.format("%Y-%m-%dT%H:%M:%SZ").to_string()
+}
+
+// 禁用xbox录屏通过注册表
+fn disable_xbox_recording() -> Result<(), Box<dyn std::error::Error>> {
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let path = r"System\GameConfigStore";
+    let key = hkcu.open_subkey_with_flags(path, KEY_SET_VALUE)?;
+    key.set_value("GameDVR_Enabled", &0u32)?; // 0表示禁用
+    let path2 = r"Software\Microsoft\Windows\CurrentVersion\GameDVR";
+    let key2 = hkcu.open_subkey_with_flags(path2, KEY_SET_VALUE)?;
+    key2.set_value("AppCaptureEnabled", &0u32)?; // 0表示禁用
+    Ok(())
+}
+// 启用xbox录屏通过注册表
+fn enable_xbox_recording() -> Result<(), Box<dyn std::error::Error>> {
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let path = r"System\GameConfigStore";
+    let key = hkcu.open_subkey_with_flags(path, KEY_SET_VALUE)?;
+    key.set_value("GameDVR_Enabled", &1u32)?; // 1表示启用
+    let path2 = r"Software\Microsoft\Windows\CurrentVersion\GameDVR";
+    let key2 = hkcu.open_subkey_with_flags(path2, KEY_SET_VALUE)?;
+    key2.set_value("AppCaptureEnabled", &1u32)?; // 1表示启用
+    Ok(())
+}
+
+// 获取Xbox录屏状态
+fn get_xbox_recording_status() -> Result<bool, Box<dyn std::error::Error>> {
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let path = r"System\GameConfigStore";
+    let key = hkcu.open_subkey(path)?;
+    let enabled: u32 = key.get_value("GameDVR_Enabled")?;
+    Ok(enabled != 0)
 }

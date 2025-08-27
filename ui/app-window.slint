@@ -1,7 +1,6 @@
 
 import { Button, VerticalBox } from "std-widgets.slint";
-import { ErrorDialog } from "ErrorDialog.slint";
-import { InfoDialog } from "InfoDialog.slint";
+
 
 export component AppWindow inherits Window {
     title: "小工具";
@@ -11,6 +10,9 @@ export component AppWindow inherits Window {
     in-out property <string> success_message: "";
     in-out property <string> wu_status: "未知";
     in-out property <string> wu_action_text: "";
+    in-out property <string> xbox_status: "未知";
+    callback enable-xbox-recording();
+    callback disable-xbox-recording();
     callback toggle-windows-update();
     callback add-xiaohe-doublepinyin();
     callback remove-xiaohe-doublepinyin();
@@ -57,18 +59,43 @@ export component AppWindow inherits Window {
                 root.pause-windows-update();
             }
         }
-    }
 
-    if root.error_message != "": ErrorDialog {
-        message: root.error_message;
-        on_close => {
-            root.error_message = "";
-        }
-    }
-    if root.success_message != "": InfoDialog {
-        message: root.success_message;
-        on_close => {
-            root.success_message = "";
+        Rectangle {
+            width: parent.width;
+            height: 80px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            // y: 16px;
+            VerticalLayout {
+                spacing: 8px;
+                Text {
+                    text: "Xbox屏幕录制";
+                    font-size: 18px;
+                    horizontal-alignment: center;
+                }
+
+                HorizontalLayout {
+                    spacing: 16px;
+                    Text {
+                        text: "状态：" + root.xbox_status;
+                        font-size: 16px;
+                    }
+
+                    Button {
+                        text: "开启";
+                        clicked => {
+                            root.enable-xbox-recording();
+                        }
+                    }
+
+                    Button {
+                        text: "禁用";
+                        clicked => {
+                            root.disable-xbox-recording();
+                        }
+                    }
+                }
+            }
         }
     }
 }
