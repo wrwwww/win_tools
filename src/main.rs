@@ -74,17 +74,19 @@ fn main() -> Result<(), Box<dyn Error>> {
             ui.set_wu_action_text("检测失败".into());
             unsafe {
                 let msg = format!("检测Windows更新状态失败: {}", e);
-                MessageBoxW(
-                    Some(HWND(std::ptr::null_mut())),
-                    PCWSTR(
-                        msg.encode_utf16()
-                            .chain(Some(0))
-                            .collect::<Vec<u16>>()
-                            .as_ptr(),
-                    ),
-                    w!("错误"),
-                    MB_OK | MB_ICONERROR,
-                );
+                std::thread::spawn(move || {
+                    MessageBoxW(
+                        Some(HWND(std::ptr::null_mut())),
+                        PCWSTR(
+                            msg.encode_utf16()
+                                .chain(Some(0))
+                                .collect::<Vec<u16>>()
+                                .as_ptr(),
+                        ),
+                        w!("错误"),
+                        MB_OK | MB_ICONERROR,
+                    );
+                });
             }
         }
     }
@@ -105,24 +107,28 @@ fn main() -> Result<(), Box<dyn Error>> {
                         ui.set_wu_status("开启".into());
                         ui.set_wu_action_text("关闭".into());
                         unsafe {
-                            MessageBoxW(
-                                None,
-                                w!("已开启Windows更新"),
-                                w!("提示"),
-                                MB_OK | MB_ICONINFORMATION,
-                            );
+                            std::thread::spawn(|| {
+                                MessageBoxW(
+                                    None,
+                                    w!("已开启Windows更新"),
+                                    w!("提示"),
+                                    MB_OK | MB_ICONINFORMATION,
+                                );
+                            });
                         }
                     }
                     Ok(false) => {
                         ui.set_wu_status("关闭".into());
                         ui.set_wu_action_text("开启".into());
                         unsafe {
-                            MessageBoxW(
-                                None,
-                                w!("已关闭Windows更新"),
-                                w!("提示"),
-                                MB_OK | MB_ICONINFORMATION,
-                            );
+                            std::thread::spawn(|| {
+                                MessageBoxW(
+                                    None,
+                                    w!("已关闭Windows更新"),
+                                    w!("提示"),
+                                    MB_OK | MB_ICONINFORMATION,
+                                );
+                            });
                         }
                     }
                     Err(e) => {
@@ -130,34 +136,38 @@ fn main() -> Result<(), Box<dyn Error>> {
                         ui.set_wu_action_text("检测失败".into());
                         unsafe {
                             let msg = format!("检测Windows更新状态失败: {}", e);
-                            MessageBoxW(
-                                None,
-                                PCWSTR(
-                                    msg.encode_utf16()
-                                        .chain(Some(0))
-                                        .collect::<Vec<u16>>()
-                                        .as_ptr(),
-                                ),
-                                w!("错误"),
-                                MB_OK | MB_ICONERROR,
-                            );
+                            std::thread::spawn(move || {
+                                MessageBoxW(
+                                    None,
+                                    PCWSTR(
+                                        msg.encode_utf16()
+                                            .chain(Some(0))
+                                            .collect::<Vec<u16>>()
+                                            .as_ptr(),
+                                    ),
+                                    w!("错误"),
+                                    MB_OK | MB_ICONERROR,
+                                );
+                            });
                         }
                     }
                 }
             }
             Err(e) => unsafe {
                 let msg = format!("操作Windows更新失败: {}", e);
-                MessageBoxW(
-                    None,
-                    PCWSTR(
-                        msg.encode_utf16()
-                            .chain(Some(0))
-                            .collect::<Vec<u16>>()
-                            .as_ptr(),
-                    ),
-                    w!("错误"),
-                    MB_OK | MB_ICONERROR,
-                );
+                std::thread::spawn(move || {
+                    MessageBoxW(
+                        None,
+                        PCWSTR(
+                            msg.encode_utf16()
+                                .chain(Some(0))
+                                .collect::<Vec<u16>>()
+                                .as_ptr(),
+                        ),
+                        w!("错误"),
+                        MB_OK | MB_ICONERROR,
+                    );
+                });
             },
         }
     });
@@ -166,26 +176,30 @@ fn main() -> Result<(), Box<dyn Error>> {
         let ui = ui_add.clone().unwrap();
         match add_xiaohe_doublepinyin_to_registry() {
             Ok(_) => unsafe {
-                MessageBoxW(
-                    None,
-                    w!("添加小鹤双拼成功！"),
-                    w!("提示"),
-                    MB_OK | MB_ICONINFORMATION,
-                );
+                std::thread::spawn(|| {
+                    MessageBoxW(
+                        None,
+                        w!("添加小鹤双拼成功！"),
+                        w!("提示"),
+                        MB_OK | MB_ICONINFORMATION,
+                    );
+                });
             },
             Err(e) => unsafe {
                 let msg = format!("添加小鹤双拼失败: {}", e);
-                MessageBoxW(
-                    None,
-                    PCWSTR(
-                        msg.encode_utf16()
-                            .chain(Some(0))
-                            .collect::<Vec<u16>>()
-                            .as_ptr(),
-                    ),
-                    w!("错误"),
-                    MB_OK | MB_ICONERROR,
-                );
+                std::thread::spawn(move || {
+                    MessageBoxW(
+                        None,
+                        PCWSTR(
+                            msg.encode_utf16()
+                                .chain(Some(0))
+                                .collect::<Vec<u16>>()
+                                .as_ptr(),
+                        ),
+                        w!("错误"),
+                        MB_OK | MB_ICONERROR,
+                    );
+                });
             },
         }
     });
@@ -194,26 +208,30 @@ fn main() -> Result<(), Box<dyn Error>> {
         let ui = ui_remove.clone().unwrap();
         match remove_xiaohe_doublepinyin_from_registry() {
             Ok(_) => unsafe {
-                MessageBoxW(
-                    None,
-                    w!("删除小鹤双拼成功！"),
-                    w!("提示"),
-                    MB_OK | MB_ICONINFORMATION,
-                );
+                std::thread::spawn(|| {
+                    MessageBoxW(
+                        None,
+                        w!("删除小鹤双拼成功！"),
+                        w!("提示"),
+                        MB_OK | MB_ICONINFORMATION,
+                    );
+                });
             },
             Err(e) => unsafe {
                 let msg = format!("删除小鹤双拼失败: {}", e);
-                MessageBoxW(
-                    None,
-                    PCWSTR(
-                        msg.encode_utf16()
-                            .chain(Some(0))
-                            .collect::<Vec<u16>>()
-                            .as_ptr(),
-                    ),
-                    w!("错误"),
-                    MB_OK | MB_ICONERROR,
-                );
+                std::thread::spawn(move || {
+                    MessageBoxW(
+                        None,
+                        PCWSTR(
+                            msg.encode_utf16()
+                                .chain(Some(0))
+                                .collect::<Vec<u16>>()
+                                .as_ptr(),
+                        ),
+                        w!("错误"),
+                        MB_OK | MB_ICONERROR,
+                    );
+                });
             },
         }
     });
@@ -222,15 +240,38 @@ fn main() -> Result<(), Box<dyn Error>> {
         let ui = ui_pause.clone().unwrap();
         match mod_window_update_pause_time() {
             Ok(_) => unsafe {
-                MessageBoxW(
-                    None,
-                    w!("已将Windows更新暂停30天"),
-                    w!("提示"),
-                    MB_OK | MB_ICONINFORMATION,
-                );
+                std::thread::spawn(|| {
+                    MessageBoxW(
+                        None,
+                        w!("已将Windows更新暂停30天"),
+                        w!("提示"),
+                        MB_OK | MB_ICONINFORMATION,
+                    );
+                });
             },
             Err(e) => unsafe {
                 let msg = format!("暂停更新失败: {}", e);
+                std::thread::spawn(move || {
+                    MessageBoxW(
+                        None,
+                        PCWSTR(
+                            msg.encode_utf16()
+                                .chain(Some(0))
+                                .collect::<Vec<u16>>()
+                                .as_ptr(),
+                        ),
+                        w!("错误"),
+                        MB_OK | MB_ICONERROR,
+                    );
+                });
+            },
+        }
+    });
+    let ui_msg = ui.as_weak();
+    ui.on_show_message(move |text| {
+        let msg = text.trim().to_string();
+        if !msg.is_empty() {
+            std::thread::spawn(move || unsafe {
                 MessageBoxW(
                     None,
                     PCWSTR(
@@ -239,10 +280,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                             .collect::<Vec<u16>>()
                             .as_ptr(),
                     ),
-                    w!("错误"),
-                    MB_OK | MB_ICONERROR,
+                    w!("用户输入"),
+                    MB_OK | MB_ICONINFORMATION,
                 );
-            },
+            });
         }
     });
     ui.run()?;

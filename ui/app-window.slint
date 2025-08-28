@@ -11,12 +11,14 @@ export component AppWindow inherits Window {
     in-out property <string> wu_status: "未知";
     in-out property <string> wu_action_text: "";
     in-out property <string> xbox_status: "未知";
+    in-out property <string> input_text: "未知";
     callback enable-xbox-recording();
     callback disable-xbox-recording();
     callback toggle-windows-update();
     callback add-xiaohe-doublepinyin();
     callback remove-xiaohe-doublepinyin();
     callback pause-windows-update();
+    callback show_message(text: string);
     Rectangle {
         background: #fafbfc;
         border-radius: 12px;
@@ -152,6 +154,39 @@ export component AppWindow inherits Window {
                             min-height: 28px;
                             clicked => {
                                 root.disable-xbox-recording();
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                background: #fff;
+                border-radius: 8px;
+                width: parent.width - 48px;
+                height: 70px;
+                x: 24px;
+                VerticalLayout {
+                    spacing: 6px;
+                    Text {
+                        text: "测试弹窗";
+                        font-size: 15px;
+                        font-weight: 500;
+                        horizontal-alignment: left;
+                        color: #222;
+                    }
+
+                    HorizontalLayout {
+                        spacing: 8px;
+                        TextInput {
+                            width: 200px;
+                            text: root.input_text;
+                        }
+
+                        Button {
+                            text: "弹窗显示";
+                            clicked => {
+                                root.show_message(root.input_text);
                             }
                         }
                     }
